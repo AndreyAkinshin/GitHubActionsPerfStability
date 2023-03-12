@@ -1,0 +1,25 @@
+name: build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.201
+    - name: Build
+      run: dotnet build --configuration Release GitHubActionsPerfStability.csproj
+    - name: Run
+      run: dotnet run --configuration Release --project GitHubActionsPerfStability.csproj
+    - name: Save measurements to artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: measurements-${{ matrix.operating-system }}
+        path: "**/*results.csv"
